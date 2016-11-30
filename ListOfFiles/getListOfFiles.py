@@ -5,22 +5,24 @@ import contextlib
 
 def walktree(top, callback, output):
 
-    for f in os.listdir(top):
-        pathname = os.path.join(top, f)
-        if os.path.exists(pathname):
-            if pathname.find('$') < 0:
-                mode = os.stat(pathname).st_mode
-                if S_ISDIR(mode):
-                    walktree(pathname, callback, output)
-                elif S_ISREG(mode):
-                    callback(pathname, output)
-                else:
-                    print 'Skipping %s' % pathname
+    if os.access(top, os.R_OK):
+        for f in os.listdir(top):
+            pathname = os.path.join(top, f)
+
+            if os.path.exists(pathname):
+                if pathname.find('$') < 0:
+                    mode = os.stat(pathname).st_mode
+                    if S_ISDIR(mode):
+                        walktree(pathname, callback, output)
+                    elif S_ISREG(mode):
+                        callback(pathname, output)
+                    else:
+                        print 'Skipping %s' % pathname
 
 
 def getFileSize(file, output):
     try:
-        size = os.stat(file).st_size / 1024 / 1024
+        size = os.path.getsize(file) / 1024 / 1024
         if size >= 100:
             output.writeline('%s \t %d\n' % (file, size))
     except:
@@ -32,4 +34,4 @@ if __name__ == '__main__':
             if os.path.getsize('results.txt') > 0:
                 results.truncate()
 
-        walktree('c:\\', getFileSize, results)
+        walktree('C:\\Program Files (x86)\\Dropbox', getFileSize, results)
