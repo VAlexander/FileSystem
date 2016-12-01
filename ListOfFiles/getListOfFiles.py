@@ -1,12 +1,13 @@
 import os
 import sys
 from stat import S_ISDIR, S_ISREG
-import contextlib
+import errno
+# import contextlib
 
 def walktree(top, callback, output):
-
-    if os.access(top, os.R_OK):
-        for f in os.listdir(top):
+    try:
+        pathname = top
+        for f in os.listdir(pathname):
             pathname = os.path.join(top, f)
 
             if os.path.exists(pathname):
@@ -18,6 +19,18 @@ def walktree(top, callback, output):
                         callback(pathname, output)
                     else:
                         print 'Skipping %s' % pathname
+    except IOError as e:
+        if e.errno == errno.EACCES:
+            print "{0}: error code is {1}".format(pathname, e.errno)
+        else:
+            raise
+    except WindowsError as e:
+        if e.errno == errno.EACCES:
+            print "{0}: error code is {1}".format(pathname, e.errno)
+        else:
+            raise
+    except Exception as e:
+        print "{0}: error code is {1}".format(pathname, e.message)
 
 
 def getFileSize(file, output):
