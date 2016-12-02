@@ -27,6 +27,8 @@ def walktree(top, callback, output):
     except WindowsError as e:
         if e.errno == errno.EACCES:
             print "{0}: error code is {1}".format(pathname, e.errno)
+        elif e.errno in (errno.ESRCH, errno.ENOENT):
+            print "Something wrong with {0}: {1}".format(pathname, e.strerror)
         else:
             raise
     except Exception as e:
@@ -37,8 +39,8 @@ def getFileSize(file, output):
     try:
         size = os.path.getsize(file) / 1024 / 1024
         if size >= 100:
-            output.writeline('%s \t %d\n' % (file, size))
-    except:
+            output.write('{0} \t {1}\n'.format(file, size))
+    except Exception as e:
         print "Skipping {0} due to error: {1}".format(file, sys.exc_info()[0])
 
 if __name__ == '__main__':
@@ -47,4 +49,4 @@ if __name__ == '__main__':
             if os.path.getsize('results.txt') > 0:
                 results.truncate()
 
-        walktree('C:\\Program Files (x86)\\Dropbox', getFileSize, results)
+        walktree('C:\\', getFileSize, results)
